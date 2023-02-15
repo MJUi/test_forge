@@ -54,7 +54,7 @@ EOH
 # Fichier de configuration log4j2
       template {
         change_mode = "restart"
-        destination = "secrets/log4j2.xml"
+        destination = "local/log4j2.xml"
         data = <<EOT
 {{ with secret "forge/squashtm" }}{{.Data.data.log4j2}}{{end}}   
         EOT
@@ -77,7 +77,7 @@ EOH
                 mount {
                     type = "bind"
                     target = "/opt/squash-tm/conf/log4j2.xml"
-                    source = "secrets/log4j2.xml"
+                    source = "local/log4j2.xml"
                     readonly = false
                     bind_options {
                         propagation = "rshared"
@@ -105,5 +105,22 @@ EOH
                 }
             }
         } 
+
+
+        task "user" {
+            lifecycle {
+                hook = "poststart"
+                sidecar = false
+            }
+
+            driver = "exec"
+            config {
+                command = ["/bin/chown"]
+                args =  ["-c", "chown -R squashtm:squashtm", "/opt/squash-tm/conf"]
+            }
+        }
+
+
+
     }
 }
